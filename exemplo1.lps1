@@ -1,0 +1,8 @@
+G n
+G p
+= i 0
+W i # n {
+  * a p i
+  P a
+  + i i 1
+}
