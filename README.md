@@ -1,50 +1,42 @@
-# Compiladores LPS1 - Guia Rápido
+# Compiladores LPS1
 
-## Quick Start
+Implementacao do trabalho final de Compiladores para a linguagem LPS1.
 
-Execute todos os comandos abaixo em sequência na pasta raiz do projeto.
+- `CompilerA.java`: analisador sintatico com geracao de codigo C misturada as rotinas do parser.
+- `CompilerB.java`: analisador sintatico que constroi uma ASA e gera codigo C nos metodos dos nos da ASA.
+- A saida dos compiladores e o codigo C impresso na saida padrao com `System.out.println`.
+- Entradas de exemplo: `exemplo1.lps1` e `exemplo2.lps1`.
 
-### Etapa 1: Compilar Java
+## Executar com Java e GCC locais
 
 ```powershell
-mkdir bin
+mkdir bin -ErrorAction SilentlyContinue
+mkdir saida -ErrorAction SilentlyContinue
+
 javac -d bin *.java
-```
 
-### Etapa 2: Gerar Código C
-
-```powershell
-mkdir saida
 java -cp bin CompilerA exemplo1.lps1 > saida/saida1_a.c
 java -cp bin CompilerA exemplo2.lps1 > saida/saida2_a.c
 java -cp bin CompilerB exemplo1.lps1 > saida/saida1_b.c
 java -cp bin CompilerB exemplo2.lps1 > saida/saida2_b.c
+
+gcc -std=c11 -Wall -Wextra -Werror saida/saida1_a.c -o saida/saida1_a.exe
+gcc -std=c11 -Wall -Wextra -Werror saida/saida1_b.c -o saida/saida1_b.exe
+gcc -std=c11 -Wall -Wextra -Werror saida/saida2_a.c -o saida/saida2_a.exe
+gcc -std=c11 -Wall -Wextra -Werror saida/saida2_b.c -o saida/saida2_b.exe
 ```
 
-### Etapa 3: Compilar C
+## Executar com Docker
+
+Use este caminho quando a maquina nao tiver `javac` e `gcc` instalados no PATH.
 
 ```powershell
-cd saida
-gcc saida1_a.c -o saida1_a.exe
-gcc saida1_b.c -o saida1_b.exe
-gcc saida2_a.c -o saida2_a.exe
-gcc saida2_b.c -o saida2_b.exe
+docker build -t compilador-lps1 .
+docker run --rm compilador-lps1
 ```
 
-### Etapa 4: Executar
+O `docker build` compila os dois compiladores, gera os quatro arquivos C, compila os C com `-Wall -Wextra -Werror` e compara as saidas esperadas. O comando `docker run` mostra:
 
-```powershell
-.\saida1_a.exe
-.\saida1_b.exe
-.\saida2_a.exe
-.\saida2_b.exe
-```
-
----
-
-## Notas
-
-- **CompilerA**: Tradução Dirigida por Sintaxe (geração misturada com análise)
-- **CompilerB**: ASA + Percurso (constrói árvore e depois gera código)
-- Arquivos de entrada: `exemplo1.lps1` e `exemplo2.lps1`
-- Arquivos de saída: `saida/saida[1-2]_[a-b].c`
+- exemplo 1 em A e B com entrada `5` e `3`, imprimindo `0 3 6 9 12`;
+- exemplo 2 em A e B com entrada `5`, imprimindo `0` porque 5 e primo;
+- exemplo 2 em A e B com entrada `4`, imprimindo `1` porque 4 nao e primo.

@@ -110,11 +110,20 @@ public class CompilerB {
                 return new Token(Token.Type.VARIABLE, String.valueOf(ch), startLine, startCol);
             }
 
-            // Number check: single digit
+            // Number check: one or more digits
             if (ch >= '0' && ch <= '9') {
-                pos++;
-                col++;
-                return new Token(Token.Type.NUMBER, String.valueOf(ch), startLine, startCol);
+                StringBuilder sb = new StringBuilder();
+                while (pos < input.length()) {
+                    ch = input.charAt(pos);
+                    if (ch >= '0' && ch <= '9') {
+                        sb.append(ch);
+                        pos++;
+                        col++;
+                    } else {
+                        break;
+                    }
+                }
+                return new Token(Token.Type.NUMBER, sb.toString(), startLine, startCol);
             }
 
             Token.Type type = null;
@@ -166,13 +175,14 @@ public class CompilerB {
             sb.append("#include <stdio.h>\n\n");
             sb.append("int main() {\n");
             sb.append("  int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;\n");
+            sb.append("  a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = 0;\n");
             sb.append("  char str[512]; // auxiliar na leitura com G\n");
 
             for (CommandNode cmd : commands) {
                 sb.append(cmd.toCCode(indent));
             }
 
-            sb.append("  gets(str);\n");
+            sb.append("  return 0;\n");
             sb.append("}\n");
             return sb.toString();
         }
@@ -286,8 +296,9 @@ public class CompilerB {
             String ind = getIndent(indent);
             return ind + "// " + toLPS1() + "\n" +
                    ind + "{\n" +
-                   ind + "  gets(str);\n" +
-                   ind + "  sscanf(str, \"%d\", &" + variable + ");\n" +
+                   ind + "  if (fgets(str, sizeof(str), stdin) != NULL) {\n" +
+                   ind + "    sscanf(str, \"%d\", &" + variable + ");\n" +
+                   ind + "  }\n" +
                    ind + "}\n";
         }
 
@@ -613,7 +624,7 @@ public class CompilerB {
             Parser parser = new Parser(lexer);
             ProgramNode program = parser.parseProgram();
             String cCode = program.toCCode(1);
-            System.out.print(cCode);
+            System.out.println(cCode);
         } catch (IOException e) {
             System.err.println("Erro ao ler o arquivo: " + e.getMessage());
             System.exit(1);
